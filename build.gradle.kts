@@ -27,26 +27,29 @@ dependencies {
     // Liquibase
     implementation("org.liquibase:liquibase-core")
 
+    // Внимание: здесь была ошибка в оригинале — дублирование spring-boot-starter-web
+    // Убрано дублирование
+
     // Стартер для валидации
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    // Добавляет Swagger UI
+    // Swagger UI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
-    // Database driver (PostgreSQL)
+    // База данных — PostgreSQL
     implementation("org.postgresql:postgresql")
 
-    // Lombok
+    // Lombok (только для компиляции)
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
-    // JUnit 5 (Jupiter)
+    // JUnit 5 launcher (для запуска тестов)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Стартер для поддержки @AutoConfigureMockMvc в Spring Boot 4
+    // Поддержка @AutoConfigureMockMvc (аналог стартера тестов WebMvc)
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 
-    // Тестовый стартер (JUnit 5, AssertJ, Mockito)
+    // Основной тестовый стартер (включает JUnit, Mockito, AssertJ и др.)
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

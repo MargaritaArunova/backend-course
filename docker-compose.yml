@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:12
+    container_name: hl-module1-db
+    environment:
+      POSTGRES_DB: socialdb
+      POSTGRES_USER: socialuser
+      POSTGRES_PASSWORD: socialpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: hl-module1-app
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/socialdb
+      SPRING_DATASOURCE_USERNAME: socialuser
+      SPRING_DATASOURCE_PASSWORD: socialpass
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:
+

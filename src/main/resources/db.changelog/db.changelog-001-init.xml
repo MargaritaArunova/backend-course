@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="001-create-users" author="cursor">
+        <createTable tableName="users">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_users"/>
+            </column>
+            <column name="nickname" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_users_nickname"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_users_email"/>
+            </column>
+            <column name="registered_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-posts" author="cursor">
+        <createTable tableName="posts">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_posts"/>
+            </column>
+            <column name="text" type="VARCHAR(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_posts_author"
+                             referencedTableName="users" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-comments" author="cursor">
+        <createTable tableName="comments">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_comments"/>
+            </column>
+            <column name="text" type="VARCHAR(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_comments_author"
+                             referencedTableName="users" referencedColumnNames="id"/>
+            </column>
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_comments_post"
+                             referencedTableName="posts" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-create-likes" author="cursor">
+        <createTable tableName="likes">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_likes"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_likes_user"
+                             referencedTableName="users" referencedColumnNames="id"/>
+            </column>
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_likes_post"
+                             referencedTableName="posts" referencedColumnNames="id"/>
+            </column>
+            <column name="liked_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="likes"
+                             columnNames="user_id, post_id"
+                             constraintName="uk_like_user_post"/>
+    </changeSet>
+
+</databaseChangeLog>
+
