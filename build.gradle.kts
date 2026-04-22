@@ -22,10 +22,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
 
     // JPA / Hibernate
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    // implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     // Liquibase
-    implementation("org.liquibase:liquibase-core")
+    // implementation("org.liquibase:liquibase-core")
 
     // Стартер для валидации
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -34,7 +34,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
     // Database driver (PostgreSQL)
-    implementation("org.postgresql:postgresql")
+    // implementation("org.postgresql:postgresql")
 
     // Lombok
     compileOnly("org.projectlombok:lombok")
