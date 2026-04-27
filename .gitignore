@@ -62,3 +62,16 @@ Thumbs.db
 *.mov
 *.wmv
 
+# K6 test results
+k6/results/
+k6/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
