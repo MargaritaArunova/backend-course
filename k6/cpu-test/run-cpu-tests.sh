@@ -12,7 +12,7 @@ REMOTE="ssh ${REMOTE_HOST}"
 
 # Настройки теста
 VUS=50                    # Постоянное количество виртуальных пользователей
-DURATION="3m"             # Длительность каждого теста
+DURATION=60s             # Длительность каждого теста
 
 # Соотношения вставка/чтение для тестирования
 WRITE_RATIOS=("0.05" "0.50" "0.95")  # 5/95, 50/50, 95/5
@@ -74,7 +74,7 @@ set_cpu_limit() {
 # Функция для очистки базы данных
 clear_database() {
     echo "Clearing database..."
-    $REMOTE "python3 $REMOTE_COMPOSE_DIR/k6/seed-data.py --clear-all --base-url "$BASE_URL" || echo "Warning: Failed to clear database""
+    $REMOTE "python3 $REMOTE_COMPOSE_DIR/k6/seed-data.py --clear-all || echo "Warning: Failed to clear database""
     sleep 2
 }
 
