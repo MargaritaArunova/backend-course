@@ -5,6 +5,11 @@
 
 set -e
 
+REMOTE_HOST="marunova-backend"
+REMOTE_COMPOSE_DIR="~/backend-course"
+BASE_URL="http://192.168.1.100:8080"
+REMOTE="ssh ${REMOTE_HOST}"
+
 # Настройки теста
 VUS=50                    # Постоянное количество виртуальных пользователей
 DURATION="3m"             # Длительность каждого теста
@@ -44,7 +49,7 @@ set_cpu_limit() {
     export APP_CPU_RESERVATION="${cpu_limit}"
 
     # Пересоздаем контейнер с новыми лимитами
-    docker-compose -f "$DOCKER_COMPOSE_FILE" up -d --force-recreate app
+    $REMOTE "docker-compose -f "$DOCKER_COMPOSE_FILE" up -d --force-recreate app"
 
     # Ждем, пока приложение запустится
     echo "Waiting for application to start..."
@@ -70,7 +75,7 @@ set_cpu_limit() {
 # Функция для очистки базы данных
 clear_database() {
     echo "Clearing database..."
-    python3 ../seed-data.py --clear-all --base-url "$BASE_URL" || echo "Warning: Failed to clear database"
+    $REMOTE "python3 ../seed-data.py --clear-all --base-url "$BASE_URL" || echo "Warning: Failed to clear database""
     sleep 2
 }
 
