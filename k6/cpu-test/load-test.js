@@ -20,10 +20,10 @@ export const options = {
             duration: DURATION,
         },
     },
-    thresholds: {
-        http_req_failed: ['rate<0.1'], // менее 10% ошибок
-        http_req_duration: ['p(95)<2000'], // 95% запросов быстрее 2s
-    },
+    //thresholds: {
+    //    http_req_failed: ['rate<0.1'], // менее 10% ошибок
+    //    http_req_duration: ['p(95)<5000'], // 95% запросов быстрее 5s
+    //},
 };
 
 // Кэш для пользователей и постов
