@@ -14,14 +14,24 @@ services:
       - db_data:/var/lib/postgresql/data
 
   app:
-    build: .
-    container_name: hl-module1-app
+    image: margaritaarunova/backend-course-app:latest
+    container_name: backend-course-app
     depends_on:
       - db
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/socialdb
       SPRING_DATASOURCE_USERNAME: socialuser
       SPRING_DATASOURCE_PASSWORD: socialpass
+      TOMCAT_MAX_THREADS: ${TOMCAT_MAX_THREADS:-200}
+      SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL:-false}
+    deploy:
+      resources:
+        limits:
+          cpus: '${APP_CPU_LIMIT:-0.5}'
+          memory: ${APP_MEMORY_LIMIT:-512M}
+        reservations:
+          cpus: '${APP_CPU_RESERVATION:-0.2}'
+          memory: ${APP_MEMORY_RESERVATION:-256M}
     ports:
       - "8080:8080"
 
