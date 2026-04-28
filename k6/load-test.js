@@ -32,6 +32,7 @@ function generateUser() {
 }
 
 export default function () {
+    // TODO: разделить на два пула, убрать random
     const randomValue = Math.random();
 
     if (randomValue < POST_USERS_RATIO) {

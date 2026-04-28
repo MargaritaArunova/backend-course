@@ -127,14 +127,13 @@ class DataSeeder:
 
     def create_comment(self, post_id: int, author_id: int) -> Dict[str, Any]:
         """Создает комментарий к посту."""
-        comment_data = {
+        comment_params = {
             'text': fake.sentence(),
-            'postId': post_id,
             'authorId': author_id
         }
 
         try:
-            response = self._make_request('POST', '/comments', json=comment_data)
+            response = self._make_request('POST', f'/posts/{post_id}/comments', params=comment_params)
             comment = response.json()
             self.created_comments.append(comment)
             return comment
