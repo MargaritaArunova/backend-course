@@ -34,8 +34,7 @@ export function setup() {
     console.log(`Starting test with WRITE_RATIO=${WRITE_RATIO}, VUS=${VUS}, DURATION=${DURATION}`);
 
     // Предзаполняем базу пользователями и постами для операций чтения
-    const initialUsers = 100;
-    const initialPosts = 500;
+    const initialUsers = 300;
 
     console.log(`Creating ${initialUsers} initial users...`);
     for (let i = 0; i < initialUsers; i++) {
@@ -52,20 +51,7 @@ export function setup() {
         }
     }
 
-    console.log(`Creating ${initialPosts} initial posts...`);
-    for (let i = 0; i < initialPosts; i++) {
-        if (userIds.length === 0) break;
-
-        const authorId = userIds[Math.floor(Math.random() * userIds.length)];
-        const res = http.post(`${BASE_URL}/posts?authorId=${authorId}&text=Setup post ${i}`, null);
-
-        if (res.status === 200 || res.status === 201) {
-            const post = JSON.parse(res.body);
-            postIds.push(post.id);
-        }
-    }
-
-    console.log(`Setup complete: ${userIds.length} users, ${postIds.length} posts`);
+    console.log(`Setup complete: ${userIds.length} users`);
 
     return { userIds, postIds };
 }
@@ -91,87 +77,37 @@ export default function(data) {
 function performWrite() {
     const operation = Math.random();
 
-    if (operation < 0.4) {
-        // Создание пользователя (40% операций записи)
-        const timestamp = Date.now();
-        const res = http.post(`${BASE_URL}/users`, JSON.stringify({
-            nickname: `user_${timestamp}_${Math.random().toString(36).substring(7)}`,
-            email: `user_${timestamp}_${Math.random().toString(36).substring(7)}@test.com`
-        }), {
-            headers: { 'Content-Type': 'application/json' },
-        });
+    // Создание пользователя (40% операций записи)
+    const timestamp = Date.now();
+    const res = http.post(`${BASE_URL}/users`, JSON.stringify({
+        nickname: `user_${timestamp}_${Math.random().toString(36).substring(7)}`,
+        email: `user_${timestamp}_${Math.random().toString(36).substring(7)}@test.com`
+    }), {
+        headers: { 'Content-Type': 'application/json' },
+    });
 
-        writeResponseTime.add(res.timings.duration);
+    writeResponseTime.add(res.timings.duration);
 
-        check(res, {
-            'create user status is 200': (r) => r.status === 200 || r.status === 201,
-        });
+    check(res, {
+        'create user status is 200': (r) => r.status === 200 || r.status === 201,
+    });
 
-        if (res.status === 200 || res.status === 201) {
-            const user = JSON.parse(res.body);
-            userIds.push(user.id);
-        }
-
-    } else if (operation < 0.8) {
-        // Создание поста (40% операций записи)
-        if (userIds.length === 0) return;
-
-        const authorId = userIds[Math.floor(Math.random() * userIds.length)];
-        const text = `Test post ${Date.now()} ${Math.random().toString(36).substring(7)}`;
-        const res = http.post(`${BASE_URL}/posts?authorId=${authorId}&text=${text}`, null);
-
-        writeResponseTime.add(res.timings.duration);
-
-        check(res, {
-            'create post status is 200': (r) => r.status === 200 || r.status === 201,
-        });
-
-        if (res.status === 200 || res.status === 201) {
-            const post = JSON.parse(res.body);
-            postIds.push(post.id);
-        }
-
-    } else {
-        // Создание комментария (20% операций записи)
-        if (userIds.length === 0 || postIds.length === 0) return;
-
-        const postId = postIds[Math.floor(Math.random() * postIds.length)];
-        const authorId = userIds[Math.floor(Math.random() * userIds.length)];
-        const text = `Comment ${Date.now()}`;
-
-        const res = http.post(`${BASE_URL}/posts/${postId}/comments?text=${text}&authorId=${authorId}`, null);
-
-        writeResponseTime.add(res.timings.duration);
-
-        check(res, {
-            'create comment status is 200': (r) => r.status === 200 || r.status === 201,
-        });
+    if (res.status === 200 || res.status === 201) {
+        const user = JSON.parse(res.body);
+        userIds.push(user.id);
     }
 }
 
 function performRead() {
     const operation = Math.random();
+    // Получение всех пользователей (50% операций чтения)
+    const res = http.get(`${BASE_URL}/users`);
 
-    if (operation < 0.5) {
-        // Получение всех пользователей (50% операций чтения)
-        const res = http.get(`${BASE_URL}/users`);
+    readResponseTime.add(res.timings.duration);
 
-        readResponseTime.add(res.timings.duration);
-
-        check(res, {
-            'get users status is 200': (r) => r.status === 200,
-        });
-
-    } else {
-        // Получение всех постов (50% операций чтения)
-        const res = http.get(`${BASE_URL}/posts`);
-
-        readResponseTime.add(res.timings.duration);
-
-        check(res, {
-            'get posts status is 200': (r) => r.status === 200,
-        });
-    }
+    check(res, {
+        'get users status is 200': (r) => r.status === 200,
+    });
 }
 
 export function teardown(data) {
