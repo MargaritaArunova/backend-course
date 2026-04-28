@@ -26,16 +26,8 @@ public class Comment {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false, insertable = false, updatable = false)
-    private User author;
-
     @Column(name = "author_id", nullable = false)
     private Long authorId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false, insertable = false, updatable = false)
-    private Post post;
 
     @Column(name = "post_id", nullable = false)
     private Long postId;

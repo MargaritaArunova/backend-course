@@ -7,8 +7,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -30,15 +28,6 @@ public class User {
 
     @Column(name = "registered_at", nullable = false)
     private OffsetDateTime registeredAt = OffsetDateTime.now();
-
-    @OneToMany(mappedBy = "authorId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Post> posts = new ArrayList<>();
-
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostLike> likes = new ArrayList<>();
 
     public User(String nickname, String email) {
         this.nickname = nickname;

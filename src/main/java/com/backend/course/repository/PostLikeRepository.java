@@ -13,6 +13,10 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
     Optional<PostLike> findByUserIdAndPostId(Long userId, Long postId);
 
+    void deleteByPostId(Long postId);
+
+    void deleteByUserId(Long userId);
+
     // TODO: сделать плохим, всё перенести в код для дальнейших улучшений
     @Query(value = """
             SELECT

@@ -38,29 +38,49 @@ class DataSeeder:
             return response
         except requests.exceptions.RequestException as e:
             print(f"❌ Ошибка при {method} {url}: {e}")
-            if hasattr(e.response, 'text'):
+            if hasattr(e, 'response') and hasattr(e.response, 'text'):
                 print(f"   Ответ сервера: {e.response.text}")
             raise
 
     def get_all_entities(self, endpoint: str) -> List[Dict[str, Any]]:
         """Получает все объекты по указанному эндпоинту."""
         try:
+            # Специальная обработка для лайков и комментов - получаем их из постов
+            if endpoint in ['likes', 'comments']:
+                all_entities = []
+                posts = self.get_all_entities('posts')
+                for post in posts:
+                    if endpoint in post and post[endpoint]:
+                        for entity in post[endpoint]:
+                            # Добавляем postId для последующего удаления
+                            entity['postId'] = post['id']
+                            all_entities.append(like)
+                return all_entities
+
             response = self._make_request('GET', endpoint)
-            return response.json()
+            data = response.json()
+
+            return data if isinstance(data, list) else []
         except Exception as e:
-            print(f"⚠ Не удалось получить данные из {endpoint}: {e}")
+            print(f"⚠ Не удалось получить данные из /{endpoint}: {e}")
             return []
 
-    def delete_entity(self, endpoint: str, entity_id: int, parent_id: int = None) -> bool:
+    def delete_entity(self, endpoint: str, entity_id: int, parent_id: int = None, user_id: int = None) -> bool:
         """Удаляет объект по ID."""
         try:
             # Для комментариев используем /posts/{postId}/comments/{commentId}
             if endpoint == 'comments' and parent_id:
                 self._make_request('DELETE', f"/posts/{parent_id}/comments/{entity_id}")
+            # Для лайков используем /posts/{postId}/likes?userId={userId}
+            elif endpoint == 'likes' and parent_id and user_id:
+                self._make_request('DELETE', f"/posts/{parent_id}/likes", params={'userId': user_id})
             else:
-                self._make_request('DELETE', f"{endpoint}/{entity_id}")
+                self._make_request('DELETE', f"/{endpoint}/{entity_id}")
             return True
-        except Exception:
+        except Exception as e:
+            # Добавляем отладочную информацию
+            if endpoint in ['comments', 'likes']:
+                print(f"   ⚠ Ошибка удаления {endpoint}/{entity_id}: {e}")
             return False
 
     def clear_endpoint(self, endpoint: str, include_related: bool = False):
@@ -87,9 +107,12 @@ class DataSeeder:
         for entity in entities:
             entity_id = entity.get('id')
             if entity_id:
-                # Для комментариев нужен postId
-                parent_id = entity.get('postId') if endpoint == 'comments' else None
-                if self.delete_entity(endpoint, entity_id, parent_id):
+                # Для комментариев и лайков нужен postId
+                parent_id = entity.get('postId') if endpoint in ['comments', 'likes'] else None
+                # Для лайков также нужен userId
+                user_id = entity.get('userId') if endpoint == 'likes' else None
+
+                if self.delete_entity(endpoint, entity_id, parent_id, user_id):
                     deleted_count += 1
                 else:
                     failed_count += 1
@@ -106,9 +129,13 @@ class DataSeeder:
         print("="*80)
 
         # Удаляем в порядке зависимостей: сначала зависимые данные, потом основные
-        # Благодаря каскадному удалению в JPA, достаточно удалить только users
-        # Все связанные posts, comments и likes удалятся автоматически
-        self.clear_endpoint('users', include_related=True)
+        # Каскадного удаления нет, поэтому удаляем вручную в правильном порядке
+
+        # 1. Удаляем посты (это удалит и комментарии, и лайки благодаря каскаду в PostService)
+        self.clear_endpoint('posts')
+
+        # 2. Удаляем пользователей (их посты, комментарии и лайки остаются)
+        self.clear_endpoint('users')
 
         print("\n" + "="*80)
         print("✓ ОЧИСТКА ЗАВЕРШЕНА".center(80))

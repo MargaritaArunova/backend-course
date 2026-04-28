@@ -23,7 +23,7 @@ public class CommentService {
     public List<Comment> getCommentsForPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(Post.class, postId));
-        return post.getComments();
+        return commentRepository.findByPostId(post.getId());
     }
 
     public Comment addComment(Long postId, Long authorId, String text) {
