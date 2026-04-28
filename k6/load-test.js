@@ -104,7 +104,7 @@ export function handleSummary(data) {
 
     return {
         'stdout': JSON.stringify(data, null, 2),
-        [`results/result_${vus}vus.json`]: JSON.stringify({
+        [`k6/results/result_${vus}vus.json`]: JSON.stringify({
             vus: vus,
             avg_duration: avgDuration,
             p95_duration: p95Duration,
