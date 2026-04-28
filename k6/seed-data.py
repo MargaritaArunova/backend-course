@@ -117,7 +117,7 @@ class DataSeeder:
         }
 
         try:
-            response = self._make_request('POST', '/posts', json=post_data)
+            response = self._make_request('POST', '/posts', params=post_data)
             post = response.json()
             self.created_posts.append(post)
             return post
