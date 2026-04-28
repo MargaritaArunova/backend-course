@@ -13,7 +13,6 @@ REMOTE="ssh ${REMOTE_HOST}"
 # Настройки теста
 VUS=50                    # Постоянное количество виртуальных пользователей
 DURATION="3m"             # Длительность каждого теста
-BASE_URL="http://localhost:8080"
 
 # Соотношения вставка/чтение для тестирования
 WRITE_RATIOS=("0.05" "0.50" "0.95")  # 5/95, 50/50, 95/5
@@ -33,11 +32,11 @@ mkdir -p "$RESULTS_DIR"
 SUMMARY_FILE="$RESULTS_DIR/summary.csv"
 
 # Путь к docker-compose файлу
-DOCKER_COMPOSE_FILE="../../docker-compose.yml"
+DOCKER_COMPOSE_FILE="docker-compose.yml"
 
 # Функция для получения текущего количества CPU
 get_current_cpu() {
-    docker inspect hl-module1-app --format='{{.HostConfig.NanoCpus}}' 2>/dev/null | awk '{print $1/1000000000}' || echo "0"
+    $REMOTE "docker inspect hl-module1-app --format='{{.HostConfig.NanoCpus}}' 2>/dev/null | awk '{print $1/1000000000}' || echo "0""
 }
 
 # Функция для установки CPU лимита
@@ -49,7 +48,7 @@ set_cpu_limit() {
     export APP_CPU_RESERVATION="${cpu_limit}"
 
     # Пересоздаем контейнер с новыми лимитами
-    $REMOTE "docker-compose -f "$DOCKER_COMPOSE_FILE" up -d --force-recreate app"
+    $REMOTE "docker compose -f "$REMOTE_COMPOSE_DIR/$DOCKER_COMPOSE_FILE" up -d --force-recreate app"
 
     # Ждем, пока приложение запустится
     echo "Waiting for application to start..."
@@ -75,7 +74,7 @@ set_cpu_limit() {
 # Функция для очистки базы данных
 clear_database() {
     echo "Clearing database..."
-    $REMOTE "python3 ../seed-data.py --clear-all --base-url "$BASE_URL" || echo "Warning: Failed to clear database""
+    $REMOTE "python3 $REMOTE_COMPOSE_DIR/k6/seed-data.py --clear-all --base-url "$BASE_URL" || echo "Warning: Failed to clear database""
     sleep 2
 }
 
