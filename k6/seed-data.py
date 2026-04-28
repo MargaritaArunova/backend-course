@@ -99,6 +99,22 @@ class DataSeeder:
         if failed_count > 0:
             print(f"   ⚠ Не удалось удалить: {failed_count} объект(ов)")
 
+    def clear_all_data(self):
+        """Удаляет все данные из базы данных в правильном порядке."""
+        print("\n" + "="*80)
+        print("ОЧИСТКА ВСЕХ ДАННЫХ".center(80))
+        print("="*80)
+
+        # Удаляем в порядке зависимостей: сначала зависимые данные, потом основные
+        # Благодаря каскадному удалению в JPA, достаточно удалить только users
+        # Все связанные posts, comments и likes удалятся автоматически
+        self.clear_endpoint('users', include_related=True)
+
+        print("\n" + "="*80)
+        print("✓ ОЧИСТКА ЗАВЕРШЕНА".center(80))
+        print("="*80)
+        print()
+
     def create_user(self) -> Dict[str, Any]:
         """Создает пользователя с случайными данными."""
         user_data = {
@@ -231,10 +247,10 @@ class DataSeeder:
         if failed > 0:
             print(f"   ⚠ Дубликатов пропущено: {failed}")
 
-    def seed_full_dataset(self, user_count: int):
-        """Создает полный набор тестовых данных."""
+    def create_all_entities(self, user_count: int):
+        """Создает все сущности: пользователей, посты, комментарии и лайки."""
         print("\n" + "="*80)
-        print("ЗАПОЛНЕНИЕ БАЗЫ ДАННЫХ ТЕСТОВЫМИ ДАННЫМИ".center(80))
+        print("СОЗДАНИЕ ВСЕХ СУЩНОСТЕЙ".center(80))
         print("="*80)
 
         # Создаем пользователей
@@ -253,13 +269,17 @@ class DataSeeder:
         self.seed_likes(like_count)
 
         print("\n" + "="*80)
-        print("✓ ЗАПОЛНЕНИЕ ЗАВЕРШЕНО".center(80))
+        print("✓ СОЗДАНИЕ ЗАВЕРШЕНО".center(80))
         print("="*80)
         print(f"\nСоздано:")
         print(f"  • Пользователей: {len(self.created_users)}")
         print(f"  • Постов: {len(self.created_posts)}")
         print(f"  • Комментариев: {len(self.created_comments)}")
         print()
+
+    def seed_full_dataset(self, user_count: int):
+        """Создает полный набор тестовых данных. (Алиас для create_all_entities)"""
+        self.create_all_entities(user_count)
 
 def main():
     """Основная функция."""
@@ -268,17 +288,20 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Примеры использования:
-  # Создать 500 пользователей и связанные данные
-  python3 seed-data.py --endpoint users --count 500
+  # Создать все сущности (пользователи, посты, комментарии, лайки)
+  python3 seed-data.py --create-all --count 500
 
-  # Очистить все данные пользователей (включая связанные)
-  python3 seed-data.py --endpoint users --clear
+  # Очистить все данные
+  python3 seed-data.py --clear-all
 
-  # Создать 100 пользователей
+  # Создать 100 пользователей и связанные данные
   python3 seed-data.py --endpoint users --count 100
 
   # Очистить только посты
   python3 seed-data.py --endpoint posts --clear
+
+  # Очистить и создать заново все данные
+  python3 seed-data.py --clear-all --create-all --count 500
         """
     )
 
@@ -292,7 +315,6 @@ def main():
     parser.add_argument(
         '--endpoint',
         type=str,
-        required=True,
         choices=['users', 'posts', 'comments', 'likes'],
         help='API-эндпоинт для заполнения данными'
     )
@@ -300,7 +322,19 @@ def main():
     parser.add_argument(
         '--clear',
         action='store_true',
-        help='Удалить все существующие данные перед заполнением'
+        help='Удалить все существующие данные для указанного эндпоинта'
+    )
+
+    parser.add_argument(
+        '--clear-all',
+        action='store_true',
+        help='Удалить все данные из базы данных'
+    )
+
+    parser.add_argument(
+        '--create-all',
+        action='store_true',
+        help='Создать все сущности (пользователи, посты, комментарии, лайки)'
     )
 
     parser.add_argument(
@@ -311,6 +345,10 @@ def main():
     )
 
     args = parser.parse_args()
+
+    # Проверяем валидность аргументов
+    if not args.clear_all and not args.create_all and not args.endpoint:
+        parser.error("Требуется указать --endpoint, --clear-all или --create-all")
 
     # Проверяем доступность сервиса
     try:
@@ -324,16 +362,27 @@ def main():
 
     seeder = DataSeeder(args.base_url)
 
-    # Очистка данных
-    if args.clear:
+    # Очистка всех данных
+    if args.clear_all:
+        seeder.clear_all_data()
+        # Если указан только --clear-all без --create-all, завершаем
+        if not args.create_all:
+            return
+
+    # Создание всех сущностей
+    if args.create_all:
+        seeder.create_all_entities(args.count)
+        return
+
+    # Очистка отдельного эндпоинта
+    if args.clear and args.endpoint:
         seeder.clear_endpoint(args.endpoint, include_related=True)
         return
 
-    # Заполнение данных
+    # Заполнение данных для отдельного эндпоинта
     if args.endpoint == 'users':
         # Для users создаем полный набор данных
-        seeder.clear_endpoint('users', include_related=True)
-        seeder.seed_full_dataset(args.count)
+        seeder.create_all_entities(args.count)
 
     elif args.endpoint == 'posts':
         # Загружаем существующих пользователей
