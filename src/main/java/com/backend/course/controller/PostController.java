@@ -24,5 +24,10 @@ public class PostController {
                        @RequestParam("text") String text) {
         return postService.createPost(authorId, text);
     }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        postService.deletePost(id);
+    }
 }
 

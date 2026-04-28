@@ -36,5 +36,11 @@ public class PostService {
         return postRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(Post.class, id));
     }
+
+    public void deletePost(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(Post.class, id));
+        postRepository.delete(post);
+    }
 }
 

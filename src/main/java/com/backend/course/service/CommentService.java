@@ -39,5 +39,16 @@ public class CommentService {
 
         return commentRepository.save(comment);
     }
+
+    public void deleteComment(Long postId, Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException(Comment.class, commentId));
+
+        if (!comment.getPostId().equals(postId)) {
+            throw new NotFoundException(Comment.class, commentId);
+        }
+
+        commentRepository.delete(comment);
+    }
 }
 

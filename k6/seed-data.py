@@ -51,10 +51,14 @@ class DataSeeder:
             print(f"⚠ Не удалось получить данные из {endpoint}: {e}")
             return []
 
-    def delete_entity(self, endpoint: str, entity_id: int) -> bool:
+    def delete_entity(self, endpoint: str, entity_id: int, parent_id: int = None) -> bool:
         """Удаляет объект по ID."""
         try:
-            self._make_request('DELETE', f"{endpoint}/{entity_id}")
+            # Для комментариев используем /posts/{postId}/comments/{commentId}
+            if endpoint == 'comments' and parent_id:
+                self._make_request('DELETE', f"/posts/{parent_id}/comments/{entity_id}")
+            else:
+                self._make_request('DELETE', f"{endpoint}/{entity_id}")
             return True
         except Exception:
             return False
@@ -66,9 +70,9 @@ class DataSeeder:
         # Определяем порядок очистки с учетом зависимостей
         if include_related:
             if endpoint == 'users':
-                # Сначала удаляем зависимые объекты
-                self.clear_endpoint('posts', include_related=False)
-                print("   ✓ Связанные posts удалены")
+                # Благодаря каскадному удалению в JPA, удалять связанные объекты не нужно
+                # Они удалятся автоматически
+                pass
 
         # Получаем все объекты
         entities = self.get_all_entities(endpoint)
@@ -83,7 +87,9 @@ class DataSeeder:
         for entity in entities:
             entity_id = entity.get('id')
             if entity_id:
-                if self.delete_entity(endpoint, entity_id):
+                # Для комментариев нужен postId
+                parent_id = entity.get('postId') if endpoint == 'comments' else None
+                if self.delete_entity(endpoint, entity_id, parent_id):
                     deleted_count += 1
                 else:
                     failed_count += 1

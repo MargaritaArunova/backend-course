@@ -25,5 +25,11 @@ public class CommentController {
                               @RequestParam("text") String text) {
         return commentService.addComment(postId, authorId, text);
     }
+
+    @DeleteMapping("/{commentId}")
+    public void deleteComment(@PathVariable Long postId,
+                              @PathVariable Long commentId) {
+        commentService.deleteComment(postId, commentId);
+    }
 }
 
