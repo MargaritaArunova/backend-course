@@ -29,6 +29,8 @@ services:
     environment:
       BACKEND_APP_URL: ${BACKEND_APP_URL:-http://localhost:8080}
     container_name: backend-course-additional-app
+    depends_on:
+      - app
     deploy:
       resources:
         limits:

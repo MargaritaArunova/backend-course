@@ -8,6 +8,7 @@ set -e
 REMOTE_HOST="marunova-backend"
 REMOTE_COMPOSE_DIR="~/backend-course"
 BASE_URL="http://192.168.1.100:8080"
+BASE_ADDITIONAL_URL="http://192.168.1.100:8081"
 REMOTE="ssh ${REMOTE_HOST}"
 CONTAINER_NAME="backend-course-app"
 
@@ -35,7 +36,7 @@ set_cpu_limit() {
     export APP_CPU_RESERVATION="${cpu_limit}"
 
     # Пересоздаем контейнер с новыми лимитами (это также очистит логи)
-    $REMOTE "cd $REMOTE_COMPOSE_DIR && docker compose -f $DOCKER_COMPOSE_FILE up -d --force-recreate app"
+    $REMOTE "cd $REMOTE_COMPOSE_DIR && docker compose -f $DOCKER_COMPOSE_FILE up -d --force-recreate"
 
     # Ждем, пока приложение запустится
     echo "Waiting for application to start..."
@@ -45,7 +46,7 @@ set_cpu_limit() {
     local max_attempts=30
     local attempt=1
     while [ $attempt -le $max_attempts ]; do
-        if curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/users" | grep -q "200"; then
+        if curl -s -o /dev/null -w "%{http_code}" "$BASE_ADDITIONAL_URL/statistics/self-likes" | grep -q "200"; then
             echo "Application is ready!"
             return 0
         fi
@@ -153,7 +154,7 @@ run_test() {
     echo "=========================================="
 
     # Очищаем логи контейнера перед тестом
-    clear_container_logs
+#    clear_container_logs
 
     echo "Starting K6 test..."
 
@@ -161,6 +162,7 @@ run_test() {
     k6 run \
         --out json="$output_file" \
         -e BASE_URL="$BASE_URL" \
+        -e BASE_ADDITIONAL_URL="$BASE_ADDITIONAL_URL" \
         -e VUS="$VUS" \
         -e DURATION="$DURATION" \
         load-test.js
@@ -200,7 +202,7 @@ main() {
         set_cpu_limit "$cpu"
 
         # Очищаем базу данных перед тестом
-        clear_database
+        # clear_database
 
         # Запускаем тест
         run_test "$cpu"

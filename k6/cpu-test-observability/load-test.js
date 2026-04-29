@@ -10,6 +10,7 @@ const observabilityStatsResponseTime = new Trend('observability_stats_response_t
 
 // Параметры теста
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
+const BASE_ADDITIONAL_URL = __ENV.BASE_URL || 'http://localhost:8081';
 const VUS = parseInt(__ENV.VUS || '50'); // Количество виртуальных пользователей
 const DURATION = __ENV.DURATION || '5m'; // Длительность теста
 
@@ -79,21 +80,10 @@ export default function(data) {
     // Случайный выбор операции
     const operation = Math.random();
 
-    if (operation < 0.3) {
-        // 30% - Операции с контроллерами (чтение)
-        performControllerOperation();
-    } else if (operation < 0.5) {
-        // 20% - Операции с контроллерами (запись)
+    if (operation < 0.7) {
         performControllerWrite();
-    } else if (operation < 0.7) {
-        // 20% - Запрос статистики self-likes (тяжелый запрос к БД)
-        performSelfLikeStatsOperation();
-    } else if (operation < 0.85) {
-        // 15% - Операции с лайками
-        performLikeOperation();
     } else {
-        // 15% - Запрос observability статистики
-        performObservabilityStatsOperation();
+        performSelfLikeStatsOperation();
     }
 
     sleep(0.1); // Небольшая пауза между запросами
@@ -134,7 +124,7 @@ function performControllerWrite() {
 
 function performSelfLikeStatsOperation() {
     // Запрос статистики self-likes (метод с аспектом)
-    const res = http.get(`${BASE_URL}/statistics/self-likes`);
+    const res = http.get(`${BASE_ADDITIONAL_URL}/statistics/self-likes`);
 
     selfLikeStatsResponseTime.add(res.timings.duration);
 
