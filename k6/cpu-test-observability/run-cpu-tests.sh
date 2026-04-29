@@ -12,7 +12,7 @@ REMOTE="ssh ${REMOTE_HOST}"
 
 # Настройки теста
 VUS=50                    # Постоянное количество виртуальных пользователей
-DURATION=30m              # Длительность каждого теста (увеличено для сбора статистики)
+DURATION=2m              # Длительность каждого теста (увеличено для сбора статистики)
 
 # Настройки CPU для тестирования
 CPU_LIMITS=("0.5" "1.0")
@@ -65,7 +65,7 @@ set_cpu_limit() {
 # Функция для очистки базы данных
 clear_database() {
     echo "Clearing database..."
-    $REMOTE "python3 $REMOTE_COMPOSE_DIR/k6/seed-data.py --clear-all || echo 'Warning: Failed to clear database'"
+    $REMOTE "python3 $REMOTE_COMPOSE_DIR/k6/test/seed-data.py --clear-all || echo 'Warning: Failed to clear database'"
     sleep 2
 }
 
@@ -203,8 +203,21 @@ main() {
     echo "  2. Check logs in $LOGS_DIR for detailed observability statistics"
 }
 
+export APP_ADDITIONAL_CPU_LIMIT=0.5
+export APP_ADDITIONAL_MEMORY_LIMIT=512M
+export APP_ADDITIONAL_CPU_RESERVATION=0.2
+export APP_ADDITIONAL_MEMORY_RESERVATION=256M
+export POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=hl_postgres
+export DB_HOST=hl12.zil
+export DB_PORT=5433
+export DB_NAME=hl10
+export TOMCAT_MAX_THREADS=200
+export BACKEND_APP_URL="http://app:8080"
+
 # Обработка прерывания
 trap 'echo "Interrupted! Stopping log collection..."; stop_log_collection; exit 1' INT TERM
 
 # Запускаем основную функцию
 main
+
