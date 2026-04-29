@@ -83,9 +83,9 @@ public class ObservabilityService {
         Instant cutoff = Instant.now().minusSeconds(longWindowSeconds);
 
         // Очистка старых записей
-        timingData.forEach((methodName, records) -> {
-            records.removeIf(record -> record.timestamp.isBefore(cutoff));
-        });
+        timingData.forEach((methodName, records) ->
+                records.removeIf(record -> record.timestamp.isBefore(cutoff))
+        );
 
         // Вывод статистики
         log.info("=== Observability Statistics ===");
@@ -106,7 +106,7 @@ public class ObservabilityService {
 
         stats.forEach((method, stat) -> {
             if (stat.getCount() > 0) {
-                log.info("{}: count={}, avg={:.2f}ms, min={}ms, max={}ms",
+                log.info("{}: count={}, avg={}ms, min={}ms, max={}ms",
                         method, stat.getCount(), stat.getAvgMs(), stat.getMinMs(), stat.getMaxMs());
             }
         });
