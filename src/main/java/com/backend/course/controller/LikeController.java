@@ -1,5 +1,6 @@
 package com.backend.course.controller;
 
+import com.backend.course.model.PostLike;
 import com.backend.course.repository.PostLikeRepository;
 import com.backend.course.service.LikeService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,11 @@ public class LikeController {
     public void unlikePost(@PathVariable Long postId,
                            @RequestParam("userId") Long userId) {
         likeService.unlikePost(postId, userId);
+    }
+
+    @GetMapping("/likes")
+    public List<PostLike> getAllLikes() {
+        return likeService.getAllLikes();
     }
 
     @GetMapping("/statistics/self-likes")

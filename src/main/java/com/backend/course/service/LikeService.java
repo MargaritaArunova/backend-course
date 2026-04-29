@@ -44,5 +44,9 @@ public class LikeService {
     public List<PostLikeRepository.SelfLikeStats> getSelfLikeStats() {
         return postLikeRepository.findSelfLikeStats();
     }
+
+    public List<PostLike> getAllLikes() {
+        return postLikeRepository.findAll();
+    }
 }
 

@@ -1,27 +1,15 @@
 version: "3.9"
 
 services:
-  db:
-    image: postgres:12
-    container_name: hl-module1-db
-    environment:
-      POSTGRES_DB: socialdb
-      POSTGRES_USER: socialuser
-      POSTGRES_PASSWORD: socialpass
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
   app:
     image: margaritaarunova/backend-course-app:latest
     container_name: backend-course-app
-    depends_on:
-      - db
+#    depends_on:
+#      - db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/socialdb
-      SPRING_DATASOURCE_USERNAME: socialuser
-      SPRING_DATASOURCE_PASSWORD: socialpass
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST:-db}:${DB_PORT:-5432}/${DB_NAME:-socialdb}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-socialuser}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-socialpass}
       TOMCAT_MAX_THREADS: ${TOMCAT_MAX_THREADS:-200}
       SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL:-false}
     deploy:
@@ -35,19 +23,47 @@ services:
     ports:
       - "8080:8080"
 
-  pgadmin:
-    image: dpage/pgadmin4
-    ports:
-      - "5050:80"
+  app-additional:
+    image: margaritaarunova/backend-course-additional-app:latest
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@test.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    depends_on:
-      - db
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
+      BACKEND_APP_URL: ${BACKEND_APP_URL:-http://localhost:8080}
+    container_name: backend-course-additional-app
+    deploy:
+      resources:
+        limits:
+          cpus: '${APP_ADDITIONAL_CPU_LIMIT:-0.5}'
+          memory: ${APP_MEMORY_LIMIT:-512M}
+        reservations:
+          cpus: '${APP_ADDITIONAL_CPU_RESERVATION:-0.2}'
+          memory: ${APP_MEMORY_RESERVATION:-256M}
+    ports:
+      - "8081:8081"
 
-volumes:
-  db_data:
-  pgadmin-data:
+#  db:
+#    image: postgres:12
+#    container_name: hl-module1-db
+#    environment:
+#      POSTGRES_DB: socialdb
+#      POSTGRES_USER: socialuser
+#      POSTGRES_PASSWORD: socialpass
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - db_data:/var/lib/postgresql/data
+
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    ports:
+#      - "5050:80"
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@test.com
+#      PGADMIN_DEFAULT_PASSWORD: admin
+#    depends_on:
+#      - db
+#    volumes:
+#      - pgadmin-data:/var/lib/pgadmin
+
+#volumes:
+#  db_data:
+#  pgadmin-data:
 
