@@ -9,13 +9,14 @@ REMOTE_HOST="marunova-backend"
 REMOTE_COMPOSE_DIR="~/backend-course"
 BASE_URL="http://192.168.1.100:8080"
 REMOTE="ssh ${REMOTE_HOST}"
+CONTAINER_NAME="backend-course-app"
 
 # Настройки теста
 VUS=50                    # Постоянное количество виртуальных пользователей
 DURATION=2m              # Длительность каждого теста (увеличено для сбора статистики)
 
 # Настройки CPU для тестирования
-CPU_LIMITS=("0.5" "1.0", "1.5")
+CPU_LIMITS=("0.5" "1.0")
 
 # Директория для результатов
 RESULTS_DIR="./results"
@@ -33,7 +34,7 @@ set_cpu_limit() {
     export APP_CPU_LIMIT="${cpu_limit}"
     export APP_CPU_RESERVATION="${cpu_limit}"
 
-    # Пересоздаем контейнер с новыми лимитами
+    # Пересоздаем контейнер с новыми лимитами (это также очистит логи)
     $REMOTE "cd $REMOTE_COMPOSE_DIR && docker compose -f $DOCKER_COMPOSE_FILE up -d --force-recreate app"
 
     # Ждем, пока приложение запустится
@@ -46,11 +47,6 @@ set_cpu_limit() {
     while [ $attempt -le $max_attempts ]; do
         if curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/users" | grep -q "200"; then
             echo "Application is ready!"
-
-            # Очищаем логи перед началом теста
-            $REMOTE "docker logs backend-course-app --tail 0 -f > /dev/null 2>&1 &"
-            sleep 2
-
             return 0
         fi
         echo "Attempt $attempt/$max_attempts: Application not ready yet..."
@@ -87,33 +83,59 @@ start_log_collection() {
     sleep 2
 }
 
-# Функция для остановки сбора логов
-stop_log_collection() {
-    echo "Stopping log collection..."
+# Функция для очистки логов контейнера
+clear_container_logs() {
+    echo "Clearing container logs..."
+    # Перезапускаем контейнер для очистки логов
+    $REMOTE "docker restart $CONTAINER_NAME"
 
-    if [ ! -z "$LOG_PID" ]; then
-        kill $LOG_PID 2>/dev/null || true
-        wait $LOG_PID 2>/dev/null || true
-    fi
+    # Ждем пока приложение снова запустится
+    echo "Waiting for application to restart..."
+    sleep 20
 
-    # Также останавливаем процесс на удаленной машине
-    $REMOTE "pkill -f 'docker logs backend-course-app' || true"
+    # Проверяем доступность
+    local max_attempts=20
+    local attempt=1
+    while [ $attempt -le $max_attempts ]; do
+        if curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/users" | grep -q "200"; then
+            echo "Application is ready after restart!"
+            return 0
+        fi
+        echo "Attempt $attempt/$max_attempts: Waiting for application..."
+        sleep 2
+        attempt=$((attempt + 1))
+    done
 
-    sleep 2
-    echo "Log collection stopped"
+    echo "WARNING: Application might not be fully ready"
 }
 
-# Функция для извлечения observability статистики из логов
+# Функция для извлечения observability статистики из логов контейнера
 extract_observability_stats() {
-    local log_file=$1
-    local stats_file="${log_file%.log}_stats.txt"
+    local test_name=$1
+    local log_file="$LOGS_DIR/${test_name}.log"
+    local stats_file="$LOGS_DIR/${test_name}_stats.txt"
 
-    echo "Extracting observability statistics from $log_file..."
+    echo "Fetching logs from container..."
 
-    # Извлекаем строки со статистикой observability
-    grep -A 50 "=== Observability Statistics ===" "$log_file" > "$stats_file" 2>/dev/null || echo "No observability stats found" > "$stats_file"
+    # Получаем все логи из контейнера
+    $REMOTE "docker logs $CONTAINER_NAME" > "$log_file" 2>&1
 
-    echo "Statistics saved to: $stats_file"
+    echo "Logs saved to: $log_file"
+    echo "Extracting observability statistics..."
+
+    # Извлекаем все блоки со статистикой observability
+    # Используем awk для извлечения блоков между маркерами
+    awk '/=== Observability Statistics ===/{flag=1} flag; /================================/{if(flag) flag=0}' "$log_file" > "$stats_file"
+
+    # Проверяем, нашли ли мы статистику
+    if [ -s "$stats_file" ]; then
+        local stats_count=$(grep -c "=== Observability Statistics ===" "$stats_file" || echo "0")
+        echo "Found $stats_count observability statistics blocks"
+        echo "Statistics saved to: $stats_file"
+    else
+        echo "No observability statistics found in logs" > "$stats_file"
+        echo "WARNING: No observability statistics found!"
+    fi
 }
 
 # Функция для запуска теста
@@ -130,11 +152,10 @@ run_test() {
     echo "Duration: $DURATION"
     echo "=========================================="
 
-    # Начинаем сбор логов
-    start_log_collection "$test_name"
+    # Очищаем логи контейнера перед тестом
+    clear_container_logs
 
-    # Даем время на запуск логирования
-    sleep 3
+    echo "Starting K6 test..."
 
     # Запускаем k6 тест
     k6 run \
@@ -146,18 +167,17 @@ run_test() {
 
     # Даем время на завершение записи последней статистики
     echo "Waiting for final statistics to be logged..."
-    sleep 15
+    sleep 20
 
-    # Останавливаем сбор логов
-    stop_log_collection
+    # Извлекаем observability статистику из логов контейнера
+    extract_observability_stats "$test_name"
 
-    # Извлекаем observability статистику из логов
-    extract_observability_stats "$LOGS_DIR/${test_name}.log"
-
+    echo ""
     echo "Test completed: $test_name"
     echo "Results saved to: $output_file"
     echo "Logs saved to: $LOGS_DIR/${test_name}.log"
     echo "Stats saved to: $LOGS_DIR/${test_name}_stats.txt"
+    echo ""
 }
 
 # Основная функция
@@ -216,7 +236,7 @@ export TOMCAT_MAX_THREADS=200
 export BACKEND_APP_URL="http://app:8080"
 
 # Обработка прерывания
-trap 'echo "Interrupted! Stopping log collection..."; stop_log_collection; exit 1' INT TERM
+trap 'echo "Interrupted! Exiting..."; exit 1' INT TERM
 
 # Запускаем основную функцию
 main
