@@ -48,7 +48,7 @@ fi
 
 # Установка Python зависимостей
 echo -e "\n${YELLOW}Установка Python зависимостей...${NC}"
-pip3 install -q -r k6/requirements.txt
+pip3 install -q -r k6/test/requirements.txt
 echo -e "${GREEN}✓ Зависимости установлены${NC}"
 
 # Шаг 1: Заполнение тестовыми данными
@@ -58,21 +58,21 @@ echo -e "${BLUE}========================================${NC}"
 
 USER_COUNT=${USER_COUNT:-100}
 echo -e "${YELLOW}Создание ${USER_COUNT} пользователей и связанных данных...${NC}"
-python3 k6/seed-data.py --endpoint users --count ${USER_COUNT}
+python3 k6/test/seed-data.py --endpoint users --count ${USER_COUNT}
 
 # Шаг 2: Запуск нагрузочных тестов
 echo -e "\n${BLUE}========================================${NC}"
 echo -e "${BLUE}  Шаг 2: Запуск нагрузочных тестов${NC}"
 echo -e "${BLUE}========================================${NC}"
 
-./k6/run-tests.sh
+./k6/test/run-tests.sh
 
 # Шаг 3: Генерация графиков
 echo -e "\n${BLUE}========================================${NC}"
 echo -e "${BLUE}  Шаг 3: Генерация графиков${NC}"
 echo -e "${BLUE}========================================${NC}"
 
-python3 k6/plot-results.py
+python3 k6/test/plot-results.py
 
 # Готово!
 echo -e "\n${GREEN}========================================${NC}"
@@ -80,8 +80,8 @@ echo -e "${GREEN}  ✓ Все операции завершены успешно
 echo -e "${GREEN}========================================${NC}"
 
 echo -e "\n${BLUE}Результаты:${NC}"
-echo -e "  • Результаты тестов: ${YELLOW}k6/results/*.json${NC}"
-echo -e "  • Графики: ${YELLOW}k6/results/*.png${NC}"
+echo -e "  • Результаты тестов: ${YELLOW}k6/test/results/*.json${NC}"
+echo -e "  • Графики: ${YELLOW}k6/test/results/*.png${NC}"
 echo -e "\n${BLUE}Для просмотра графиков:${NC}"
-echo -e "  ${YELLOW}open k6/results/response_time_vs_load.png${NC}"
-echo -e "  ${YELLOW}open k6/results/combined_metrics.png${NC}\n"
+echo -e "  ${YELLOW}open k6/test/results/response_time_vs_load.png${NC}"
+echo -e "  ${YELLOW}open k6/test/results/combined_metrics.png${NC}\n"

@@ -57,7 +57,7 @@ for package in "${REQUIRED_PACKAGES[@]}"; do
         echo -e "${GREEN}✓ ${VERSION}${NC}"
     else
         echo -e "${RED}✗ Not installed${NC}"
-        echo -e "    Install: ${YELLOW}pip3 install -r k6/requirements.txt${NC}"
+        echo -e "    Install: ${YELLOW}pip3 install -r k6/test/requirements.txt${NC}"
         ALL_OK=false
     fi
 done
@@ -78,11 +78,11 @@ fi
 # Проверка структуры директорий
 echo -e "\n${YELLOW}Directory structure:${NC}"
 REQUIRED_FILES=(
-    "k6/load-test.js"
-    "k6/run-tests.sh"
-    "k6/plot-results.py"
-    "k6/seed-data.py"
-    "k6/requirements.txt"
+    "k6/test/load-test.js"
+    "k6/test/run-tests.sh"
+    "k6/test/plot-results.py"
+    "k6/test/seed-data.py"
+    "k6/test/requirements.txt"
 )
 
 for file in "${REQUIRED_FILES[@]}"; do
@@ -101,9 +101,9 @@ if [ "$ALL_OK" = true ]; then
     echo -e "${GREEN}✓ All checks passed!${NC}"
     echo -e "${BLUE}========================================${NC}\n"
     echo -e "Ready to run tests:"
-    echo -e "  ${YELLOW}./k6/quick-start.sh${NC}      - Full automated run"
-    echo -e "  ${YELLOW}./k6/run-tests.sh${NC}        - Run load tests only"
-    echo -e "  ${YELLOW}./k6/test-single.sh${NC}      - Run single test"
+    echo -e "  ${YELLOW}./k6/test/quick-start.sh${NC}      - Full automated run"
+    echo -e "  ${YELLOW}./k6/test/run-tests.sh${NC}        - Run load tests only"
+    echo -e "  ${YELLOW}./k6/test/test-single.sh${NC}      - Run single test"
 else
     echo -e "${RED}✗ Some checks failed${NC}"
     echo -e "${BLUE}========================================${NC}\n"

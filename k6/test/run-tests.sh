@@ -17,7 +17,7 @@ POST_USERS_RATIO=${POST_USERS_RATIO:-"0.5"}
 VUS_LEVELS=(10 20 40 80 160)
 
 # Создаем директорию для результатов
-RESULTS_DIR="k6/results"
+RESULTS_DIR="k6/test/results"
 mkdir -p "$RESULTS_DIR"
 
 echo -e "${BLUE}========================================${NC}"
@@ -46,7 +46,7 @@ do
         -e POST_USERS_RATIO="$POST_USERS_RATIO" \
         --vus "$VUS" \
         --duration "$DURATION" \
-        k6/load-test.js
+        k6/test/load-test.js
 
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Test with ${VUS} VUs completed successfully${NC}\n"
@@ -63,4 +63,4 @@ echo -e "${GREEN}All tests completed!${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo -e "Results saved in: ${GREEN}${RESULTS_DIR}/${NC}"
 echo -e "\nTo generate charts, run:"
-echo -e "${YELLOW}python3 k6/plot-results.py${NC}\n"
+echo -e "${YELLOW}python3 k6/test/plot-results.py${NC}\n"

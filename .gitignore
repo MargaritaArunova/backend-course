@@ -63,7 +63,7 @@ Thumbs.db
 *.wmv
 
 # K6 test results
-k6/results/
+k6/**/results/
 k6/*.json
 
 # Python

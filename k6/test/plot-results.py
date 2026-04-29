@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 
-def load_results(results_dir='k6/results'):
+def load_results(results_dir='k6/test/results'):
     """Загружает результаты тестов из JSON файлов."""
     results = []
     results_path = Path(results_dir)
@@ -24,7 +24,7 @@ def load_results(results_dir='k6/results'):
 
     if not result_files:
         print(f"❌ Файлы с результатами не найдены в {results_dir}")
-        print("   Убедитесь, что вы запустили тесты командой: ./k6/run-tests.sh")
+        print("   Убедитесь, что вы запустили тесты командой: ./k6/test/run-tests.sh")
         return results
 
     for file_path in result_files:
@@ -38,7 +38,7 @@ def load_results(results_dir='k6/results'):
 
     return results
 
-def plot_response_time_vs_load(results, output_file='k6/results/response_time_vs_load.png'):
+def plot_response_time_vs_load(results, output_file='k6/test/results/response_time_vs_load.png'):
     """Строит график зависимости времени отклика от нагрузки."""
     if not results:
         print("❌ Нет данных для построения графика")
@@ -106,7 +106,7 @@ def plot_response_time_vs_load(results, output_file='k6/results/response_time_vs
     # Показываем график
     plt.show()
 
-def plot_combined_metrics(results, output_file='k6/results/combined_metrics.png'):
+def plot_combined_metrics(results, output_file='k6/test/results/combined_metrics.png'):
     """Строит комбинированный график всех метрик."""
     if not results:
         print("❌ Нет данных для построения графика")
@@ -173,7 +173,7 @@ def main():
     results = load_results()
 
     if not results:
-        print("\n⚠ Запустите сначала тесты командой: ./k6/run-tests.sh")
+        print("\n⚠ Запустите сначала тесты командой: ./k6/test/run-tests.sh")
         return
 
     print(f"\n✓ Загружено результатов: {len(results)}")

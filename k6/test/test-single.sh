@@ -25,7 +25,7 @@ echo -e "POST /users ratio: ${GREEN}${POST_USERS_RATIO}${NC}"
 echo -e "${BLUE}========================================${NC}\n"
 
 # Создаем директорию для результатов
-mkdir -p k6/results
+mkdir -p k6/test/results
 
 # Запуск теста
 k6 run \
@@ -35,7 +35,7 @@ k6 run \
     -e POST_USERS_RATIO="${POST_USERS_RATIO}" \
     --vus "${VUS}" \
     --duration "${DURATION}" \
-    k6/load-test.js
+    k6/test/load-test.js
 
 if [ $? -eq 0 ]; then
     echo -e "\n${GREEN}✓ Test completed successfully${NC}"

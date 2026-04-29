@@ -39,6 +39,9 @@ dependencies {
     // База данных — PostgreSQL
     implementation("org.postgresql:postgresql")
 
+    // AOP support
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+
     // Lombok (только для компиляции)
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
