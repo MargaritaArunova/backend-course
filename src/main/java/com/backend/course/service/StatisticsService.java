@@ -19,12 +19,12 @@ public class StatisticsService {
         this.userService = userService;
     }
 
-    @Async(value = "applicationTaskExecutor")
-    @Scheduled(fixedRateString = "${fixedRate.in.milliseconds}")
-    public void scheduleFixedRateTaskAsync() throws InterruptedException {
-        System.out.println(
-                Thread.currentThread().getName() + " - Fixed rate task async - "+ delay + " - " + infoString + " - "
-                        + userService.getAllUsers().size());
-        Thread.sleep(delay);
-    }
+    // @Async(value = "applicationTaskExecutor")
+    // @Scheduled(fixedRateString = "${fixedRate.in.milliseconds}")
+    // public void scheduleFixedRateTaskAsync() throws InterruptedException {
+    //     System.out.println(
+    //             Thread.currentThread().getName() + " - Fixed rate task async - "+ delay + " - " + infoString + " - "
+    //                     + userService.getAllUsers().size());
+    //     Thread.sleep(delay);
+    // }
 }

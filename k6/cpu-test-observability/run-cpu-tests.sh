@@ -48,7 +48,7 @@ set_cpu_limit() {
             echo "Application is ready!"
 
             # Очищаем логи перед началом теста
-            $REMOTE "docker logs hl-module1-app --tail 0 -f > /dev/null 2>&1 &"
+            $REMOTE "docker logs backend-course-app --tail 0 -f > /dev/null 2>&1 &"
             sleep 2
 
             return 0
@@ -77,7 +77,7 @@ start_log_collection() {
     echo "Starting log collection for $test_name..."
 
     # Запускаем сбор логов в фоне на удаленной машине и сохраняем их локально
-    $REMOTE "docker logs hl-module1-app -f --tail 100" > "$log_file" 2>&1 &
+    $REMOTE "docker logs backend-course-app -f --tail 100" > "$log_file" 2>&1 &
     LOG_PID=$!
 
     echo "Log collection started with PID: $LOG_PID"
@@ -97,7 +97,7 @@ stop_log_collection() {
     fi
 
     # Также останавливаем процесс на удаленной машине
-    $REMOTE "pkill -f 'docker logs hl-module1-app' || true"
+    $REMOTE "pkill -f 'docker logs backend-course-app' || true"
 
     sleep 2
     echo "Log collection stopped"
