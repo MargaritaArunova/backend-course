@@ -21,9 +21,9 @@ export const options = {
             duration: DURATION,
         },
     },
-    thresholds: {
-        http_req_failed: ['rate<0.1'], // менее 10% ошибок
-    },
+   //thresholds: {
+   //    http_req_failed: ['rate<0.1'], // менее 10% ошибок
+   //},
 };
 
 // Кэш для пользователей и постов

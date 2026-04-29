@@ -18,16 +18,16 @@ echo "=========================================="
 echo ""
 
 # Показываем статистику для каждого CPU лимита
-for stats_file in "$LOGS_DIR"/cpu_*_stats.txt; do
+for stats_file in "$LOGS_DIR"/cpu_*.log; do
     if [ ! -f "$stats_file" ]; then
         continue
     fi
 
     # Извлекаем CPU из имени файла
-    cpu=$(basename "$stats_file" | sed 's/cpu_//; s/_stats.txt//')
+    cpu=$(basename "$stats_file" | sed 's/cpu_//; s/.log//')
 
     echo ""
-    echo "==========================================">
+    echo "=========================================="
     echo "CPU: $cpu cores"
     echo "=========================================="
     echo ""
