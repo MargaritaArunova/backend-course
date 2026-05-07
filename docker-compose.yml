@@ -1,11 +1,37 @@
 version: "3.9"
 
 services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
   app:
     image: margaritaarunova/backend-course-app:latest
     container_name: backend-course-app
-#    depends_on:
-#      - db
+    depends_on:
+      - kafka
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST:-db}:${DB_PORT:-5432}/${DB_NAME:-socialdb}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-socialuser}
@@ -13,6 +39,9 @@ services:
       TOMCAT_MAX_THREADS: ${TOMCAT_MAX_THREADS:-200}
       SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL:-false}
       OBSERVABILITY_CLEANUP_INTERVAL: ${OBSERVABILITY_CLEANUP_INTERVAL:-10000}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC_PARTITIONS: ${KAFKA_TOPIC_PARTITIONS:-3}
+      KAFKA_LISTENER_CONCURRENCY: ${KAFKA_LISTENER_CONCURRENCY:-3}
     deploy:
       resources:
         limits:

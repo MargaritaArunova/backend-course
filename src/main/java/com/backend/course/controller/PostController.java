@@ -19,6 +19,11 @@ public class PostController {
         return postService.getAll();
     }
 
+    @GetMapping("/{id}")
+    public void getPostById(@PathVariable Long id) {
+        postService.getById(id);
+    }
+
     @PostMapping
     public Post create(@RequestParam("authorId") Long authorId,
                        @RequestParam("text") String text) {

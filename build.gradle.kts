@@ -42,6 +42,12 @@ dependencies {
     // AOP support
     implementation("org.springframework.boot:spring-boot-starter-aop")
 
+    // Kafka
+    implementation("org.springframework.kafka:spring-kafka")
+
+    // Jackson для JSON
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+
     // Lombok (только для компиляции)
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

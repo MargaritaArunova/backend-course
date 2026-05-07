@@ -1,0 +1,61 @@
+{
+  "examples": [
+    {
+      "description": "Создание пользователя",
+      "message": {
+        "entity": "USER",
+        "operation": "POST",
+        "payload": "{\"nickname\":\"john_doe\",\"email\":\"john@example.com\"}"
+      }
+    },
+    {
+      "description": "Обновление пользователя",
+      "message": {
+        "entity": "USER",
+        "operation": "PUT",
+        "payload": "{\"id\":1,\"nickname\":\"john_updated\",\"email\":\"john_new@example.com\"}"
+      }
+    },
+    {
+      "description": "Удаление пользователя",
+      "message": {
+        "entity": "USER",
+        "operation": "DEL",
+        "payload": "1"
+      }
+    },
+    {
+      "description": "Создание поста",
+      "message": {
+        "entity": "POST",
+        "operation": "POST",
+        "payload": "{\"authorId\":1,\"text\":\"This is an amazing post about Kafka integration!\"}"
+      }
+    },
+    {
+      "description": "Удаление поста",
+      "message": {
+        "entity": "POST",
+        "operation": "DEL",
+        "payload": "1"
+      }
+    },
+    {
+      "description": "Создание комментария",
+      "message": {
+        "entity": "COMMENT",
+        "operation": "POST",
+        "payload": "{\"postId\":1,\"authorId\":1,\"text\":\"Very insightful!\"}"
+      }
+    },
+    {
+      "description": "Удаление комментария",
+      "message": {
+        "entity": "COMMENT",
+        "operation": "DEL",
+        "payload": "{\"postId\":1,\"id\":1}"
+      }
+    }
+  ],
+  "note": "Для использования с kafka-console-producer.sh скопируйте только поле 'message' (без обертки 'examples')"
+}
