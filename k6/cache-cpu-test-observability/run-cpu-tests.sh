@@ -166,7 +166,7 @@ extract_observability_stats() {
 run_test() {
     local cpu_limit=$1
     local test_name="cpu_${cpu_limit}"
-    local output_file="$RESULTS_DIR/${test_name}.json"
+    local output_file="$RESULTS_DIR/cpu_$1_ratio_$2.json"
 
     echo ""
     echo "=========================================="
