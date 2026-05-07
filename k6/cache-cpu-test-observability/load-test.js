@@ -73,7 +73,7 @@ export function setup() {
         for (let userId of userIds) {
             for (let j = 0; j < likePerUser; j++) {
                 const randomPostId = postIds[Math.floor(Math.random() * postIds.length)];
-                const res = http.post(`${BASE_URL}/posts/${randomPostId}/likes?userId=${randomUserId}`);
+                const res = http.post(`${BASE_URL}/posts/${randomPostId}/likes?userId=${userId}`);
 
                 if (res.status === 200 || res.status === 201) {
                     const post = JSON.parse(res.body);
