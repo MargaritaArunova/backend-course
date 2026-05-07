@@ -129,7 +129,8 @@ clear_container_logs() {
 
 # Функция для извлечения observability статистики из логов контейнера
 extract_observability_stats() {
-    local test_name=$1
+    local output_file="$RESULTS_DIR/cpu_$1_ratio_$2.json"
+#    local test_name=$1
     local log_file="$LOGS_DIR/${test_name}.log"
     local stats_file="$LOGS_DIR/${test_name}_stats.txt"
 
@@ -194,7 +195,7 @@ run_test() {
     sleep 20
 
     # Извлекаем observability статистику из логов контейнера
-    extract_observability_stats "$test_name"
+    extract_observability_stats $1 $3
 
     echo ""
     echo "Test completed: $test_name"
