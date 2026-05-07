@@ -38,6 +38,7 @@ export function setup() {
     // Предзаполняем базу пользователями и постами
     const initialUsers = 100;
     const postsPerUser = 2;
+    const likePerUser = 3;
 
     console.log(`Creating ${initialUsers} initial users...`);
     for (let i = 0; i < initialUsers; i++) {
@@ -67,6 +68,21 @@ export function setup() {
             }
         }
     }
+
+    console.log(`Creating posts for users...`);
+        for (let userId of userIds) {
+            for (let j = 0; j < likePerUser; j++) {
+                const randomPostId = postIds[Math.floor(Math.random() * postIds.length)];
+                const res = http.post(`${BASE_URL}/posts/${randomPostId}/likes?userId=${userId}`);
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                if (res.status === 200 || res.status === 201) {
+                    const post = JSON.parse(res.body);
+                    postIds.push(post.id);
+                }
+            }
+        }
 
     console.log(`Setup complete: ${userIds.length} users, ${postIds.length} posts`);
 
