@@ -69,7 +69,7 @@ export function setup() {
         }
     }
 
-    console.log(`Creating posts for users...`);
+    console.log(`Creating likes for users...`);
         for (let userId of userIds) {
             for (let j = 0; j < likePerUser; j++) {
                 const randomPostId = postIds[Math.floor(Math.random() * postIds.length)];

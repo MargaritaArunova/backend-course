@@ -25,8 +25,8 @@ WRITE_RATIO_LABELS=("5_95" "50_50" "95_5")
 
 # Настройки CPU (в ядрах)
 # Определим минимум, максимум и шаг
-CPU_MIN=1
-CPU_MAX=2.5
+CPU_MIN=0.5
+CPU_MAX=2.0
 CPU_STEP=0.5
 
 # Директория для результатов
@@ -249,6 +249,9 @@ main() {
             echo "Waiting before next test..."
             sleep 5
         done
+
+        # Увеличиваем CPU
+        cpu=$(echo "$cpu + $CPU_STEP" | bc)
     done
 
     echo ""
