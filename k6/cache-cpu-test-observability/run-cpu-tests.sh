@@ -34,6 +34,13 @@ RESULTS_DIR="./results"
 LOGS_DIR="$RESULTS_DIR/logs"
 mkdir -p "$RESULTS_DIR" "$LOGS_DIR"
 
+# Директория для результатов
+RESULTS_DIR="./results"
+mkdir -p "$RESULTS_DIR"
+
+# Файл для сводных результатов
+SUMMARY_FILE="$RESULTS_DIR/summary.csv"
+
 # Путь к docker-compose файлу
 DOCKER_COMPOSE_FILE="docker-compose.yml"
 
