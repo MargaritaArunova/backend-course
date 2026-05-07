@@ -241,6 +241,7 @@ main() {
             # Пауза между тестами
             echo "Waiting before next test..."
             sleep 5
+        done
     done
 
     echo ""
